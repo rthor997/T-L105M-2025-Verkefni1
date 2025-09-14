@@ -13,7 +13,9 @@ var frogVertices;
 var frogX = 0.0;
 var frogY = -0.95;
 var frogSize = 0.05;
-
+var frogFacingUp = true;
+var topGrass = 0.22;
+var bottomGrass = 0.22;
 
 var car1 = {
     x: -1.2, 
@@ -150,8 +152,6 @@ function updateFrogVertices(facingUp = true) {
 
 window.addEventListener("keydown", function(event){
     var step = 0.18;
-    let facingUp = true;
-    
 
     switch(event.key) {
         case "ArrowUp":
@@ -168,7 +168,7 @@ window.addEventListener("keydown", function(event){
             break;     
     }
     frogX = Math.max(-1 + frogSize, Math.min(1 - frogSize, frogX));
-    frogY = Math.max(-1 + frogSize, Math.min(1 - frogSize, frogY));
+    frogY = Math.max(-1 + frogSize, Math.min(1 - 3*frogSize, frogY));
 
     updateFrogVertices(); // uppfæra þríhyrninginn
     
@@ -199,10 +199,10 @@ function render() {
 
     // --- Grass neðst og efst ---
     drawRect(-1.0, -1.0, 2.0, 0.22, [0.3, 0.6, 0.2, 1.0]); // neðst
-    drawRect(-1.0, 0.88, 2.0, 0.22, [0.3, 0.6, 0.2, 1.0]); // efst
+    drawRect(-1.0, 0.78, 2.0, 0.42, [0.3, 0.6, 0.2, 1.0]); // efst
 
     // --- Brautir og hvítar línur ---
-    let roadHeight = 0.336;
+    let roadHeight = 0.32;
     let lineHeight = 0.02;
 
     // Braut 1
@@ -222,7 +222,7 @@ function render() {
     drawRect(-1.0, 0.524, 2.0, lineHeight, [1,1,1,1]);
 
     // Braut 5
-    drawRect(-1.0, 0.544, 2.0, roadHeight, [0.2,0.2,0.2,1]);
+    drawRect(-1.0, 0.53, 2.0, roadHeight, [0.2,0.2,0.2,1]);
 
 
 
@@ -248,9 +248,14 @@ function render() {
     updateCarOfugt(car7);
     drawCar(car7);
 
+    if (frogY + 2*frogSize >= 1 - topGrass) {
+        frogFacingUp = false; 
+    } else if (frogY <= -1 + bottomGrass) {
+        frogFacingUp = true; 
+    }
 
     // --- Fríða (þríhyrningur) ---
-    updateFrogVertices();
+    updateFrogVertices(frogFacingUp);
     gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
     gl.bufferData(gl.ARRAY_BUFFER, frogVertices, gl.STATIC_DRAW);
     gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
