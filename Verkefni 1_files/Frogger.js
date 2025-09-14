@@ -11,8 +11,73 @@ var uColor;
 var bufferId;
 var frogVertices;
 var frogX = 0.0;
-var frogY = -0.85;
+var frogY = -0.95;
 var frogSize = 0.05;
+
+
+var car1 = {
+    x: -1.2, 
+    y: -0.75, 
+    w: 0.3, 
+    h: 0.15, 
+    speed: 0.02, 
+    color: [0.8, 0.0, 0.0, 1.0]
+};
+
+
+var car2 = {
+    x: 1.2, 
+    y: -0.4, 
+    w: 0.3, 
+    h: 0.15, 
+    speed: -0.017, 
+    color: [0.2, 0.8, 0.2, 1.0]
+};
+
+var car3 = {
+    x: 1.2,
+    y: -0.09,
+    w: 0.2,
+    h: 0.20,
+    speed: 0.02,
+    color: [0.1, 0.4, 0.1, 1.0]
+}
+
+var car4 = {
+    x: 0.3,
+    y: -0.09,
+    w: 0.2,
+    h: 0.20,
+    speed: 0.02,
+    color: [0.1, 0.5, 0.4, 1.0]
+}
+
+var car5 = {
+    x: 0.3,
+    y: 0.26,
+    w: 0.2,
+    h: 0.20,
+    speed: 0.04,
+    color: [0.1, 0.5, 0.4, 1.0]
+}
+
+var car6 = {
+    x: 0.3,
+    y: 0.62,
+    w: 0.2,
+    h: 0.20,
+    speed: -0.02,
+    color: [0.1, 0.5, 0.4, 1.0]
+}
+
+var car7 = {
+    x: 1.2,
+    y: 0.62,
+    w: 0.2,
+    h: 0.20,
+    speed: -0.02,
+    color: [0.1, 0.5, 0.4, 1.0]
+}
 
 
 window.onload = function init()
@@ -66,17 +131,28 @@ function drawRect(x, y, w, h, color) {
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 }
 
-function updateFrogVertices() {
-    frogVertices = new Float32Array([
-        frogX - frogSize, frogY,
-        frogX + frogSize, frogY,
-        frogX, frogY + 2*frogSize
-    ])
+function updateFrogVertices(facingUp = true) {
+    if (facingUp) {
+        frogVertices = new Float32Array([
+            frogX - frogSize, frogY,
+            frogX + frogSize, frogY,
+            frogX, frogY + 2*frogSize
+        ]);
+    } else { // snúið niður
+        frogVertices = new Float32Array([
+            frogX - frogSize, frogY + 2*frogSize,
+            frogX + frogSize, frogY + 2*frogSize,
+            frogX, frogY
+        ]);
+    }
 }
 
 
 window.addEventListener("keydown", function(event){
-    var step = 0.05;
+    var step = 0.18;
+    let facingUp = true;
+    
+
     switch(event.key) {
         case "ArrowUp":
             frogY += step;
@@ -91,32 +167,87 @@ window.addEventListener("keydown", function(event){
             frogX -= step;
             break;     
     }
-
     frogX = Math.max(-1 + frogSize, Math.min(1 - frogSize, frogX));
     frogY = Math.max(-1 + frogSize, Math.min(1 - frogSize, frogY));
 
     updateFrogVertices(); // uppfæra þríhyrninginn
-    render();
+    
 } ); 
 
+function updateCar(car) {
+    car.x += car.speed;
+    if (car.x > 1.2) {  // kemur aftur inn frá vinstri
+        car.x = -1.2;
+    }
+}
+
+function updateCarOfugt(car) {
+    car.x += car.speed;
+    if (car.x < -1.2) {  // kemur aftur inn frá hægri
+        car.x = 1.2;
+    }
+}
 
 
-
+function drawCar(car) {
+    drawRect(car.x, car.y, car.w, car.h, car.color);
+}
 
 
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     // --- Grass neðst og efst ---
-    drawRect(-1.0, -1.0, 2.0, 0.2, [0.3, 0.6, 0.2, 1.0]);
-    drawRect(-1.0, 0.8, 2.0, 0.2, [0.3, 0.6, 0.2, 1.0]);
+    drawRect(-1.0, -1.0, 2.0, 0.22, [0.3, 0.6, 0.2, 1.0]); // neðst
+    drawRect(-1.0, 0.88, 2.0, 0.22, [0.3, 0.6, 0.2, 1.0]); // efst
 
-    // --- 5 brautir ---
-    drawRect(-1.0, -0.8, 2.0, 0.32, [0.2, 0.2, 0.2, 1]); 
-    drawRect(-1.0, -0.48, 2.0, 0.32, [0.3, 0.3, 0.3, 1]); 
-    drawRect(-1.0, -0.16, 2.0, 0.32, [0.2, 0.2, 0.2, 1]); 
-    drawRect(-1.0, 0.16, 2.0, 0.32, [0.3, 0.3, 0.3, 1]); 
-    drawRect(-1.0, 0.48, 2.0, 0.32, [0.2, 0.2, 0.2, 1]); 
+    // --- Brautir og hvítar línur ---
+    let roadHeight = 0.336;
+    let lineHeight = 0.02;
+
+    // Braut 1
+    drawRect(-1.0, -0.78, 2.0, roadHeight, [0.2,0.2,0.2,1]);
+    drawRect(-1.0, -0.544, 2.0, lineHeight, [1,1,1,1]);
+
+    // Braut 2
+    drawRect(-1.0, -0.524, 2.0, roadHeight, [0.3,0.3,0.3,1]);
+    drawRect(-1.0, -0.188, 2.0, lineHeight, [1,1,1,1]);
+
+    // Braut 3
+    drawRect(-1.0, -0.168, 2.0, roadHeight, [0.2,0.2,0.2,1]);
+    drawRect(-1.0, 0.168, 2.0, lineHeight, [1,1,1,1]);
+
+    // Braut 4
+    drawRect(-1.0, 0.188, 2.0, roadHeight, [0.3,0.3,0.3,1]);
+    drawRect(-1.0, 0.524, 2.0, lineHeight, [1,1,1,1]);
+
+    // Braut 5
+    drawRect(-1.0, 0.544, 2.0, roadHeight, [0.2,0.2,0.2,1]);
+
+
+
+    // --- Bílar ---
+    updateCar(car1);
+    drawCar(car1);
+
+    updateCarOfugt(car2);
+    drawCar(car2);
+
+    updateCar(car3);
+    drawCar(car3);
+
+    updateCar(car4);
+    drawCar(car4);
+
+    updateCar(car5);
+    drawCar(car5);
+
+    updateCarOfugt(car6);
+    drawCar(car6);
+
+    updateCarOfugt(car7);
+    drawCar(car7);
+
 
     // --- Fríða (þríhyrningur) ---
     updateFrogVertices();
@@ -126,10 +257,7 @@ function render() {
     gl.uniform4fv(uColor, [1.0, 0.2, 0.2, 1]); 
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
-    // --- Bílar ---
-
-
-    requestAnimationFrame(render);
+    requestAnimFrame(render);
 
 }
 
