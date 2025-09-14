@@ -17,69 +17,15 @@ var frogFacingUp = true;
 var topGrass = 0.22;
 var bottomGrass = 0.22;
 
-var car1 = {
-    x: -1.2, 
-    y: -0.75, 
-    w: 0.3, 
-    h: 0.15, 
-    speed: 0.02, 
-    color: [0.8, 0.0, 0.0, 1.0]
-};
-
-
-var car2 = {
-    x: 1.2, 
-    y: -0.4, 
-    w: 0.3, 
-    h: 0.15, 
-    speed: -0.017, 
-    color: [0.2, 0.8, 0.2, 1.0]
-};
-
-var car3 = {
-    x: 1.2,
-    y: -0.09,
-    w: 0.2,
-    h: 0.20,
-    speed: 0.02,
-    color: [0.1, 0.4, 0.1, 1.0]
-}
-
-var car4 = {
-    x: 0.3,
-    y: -0.09,
-    w: 0.2,
-    h: 0.20,
-    speed: 0.02,
-    color: [0.1, 0.5, 0.4, 1.0]
-}
-
-var car5 = {
-    x: 0.3,
-    y: 0.26,
-    w: 0.2,
-    h: 0.20,
-    speed: 0.04,
-    color: [0.1, 0.5, 0.4, 1.0]
-}
-
-var car6 = {
-    x: 0.3,
-    y: 0.62,
-    w: 0.2,
-    h: 0.20,
-    speed: -0.02,
-    color: [0.1, 0.5, 0.4, 1.0]
-}
-
-var car7 = {
-    x: 1.2,
-    y: 0.62,
-    w: 0.2,
-    h: 0.20,
-    speed: -0.02,
-    color: [0.1, 0.5, 0.4, 1.0]
-}
+var cars = [
+    { x: -1.2, y: -0.75, w: 0.3, h: 0.15, speed: 0.02, color: [0.8, 0.0, 0.0, 1.0] },
+    { x: 1.2, y: -0.4,  w: 0.3, h: 0.15, speed: -0.017, color: [0.2, 0.8, 0.2, 1.0] },
+    { x: 1.2, y: -0.09, w: 0.2, h: 0.2,  speed: 0.02, color: [0.1, 0.4, 0.1, 1.0] },
+    { x: 0.3, y: -0.09, w: 0.2, h: 0.2,  speed: 0.02, color: [0.1, 0.5, 0.4, 1.0] },
+    { x: 0.3, y: 0.26,  w: 0.2, h: 0.2,  speed: 0.04, color: [0.1, 0.5, 0.4, 1.0] },
+    { x: 0.3, y: 0.62,  w: 0.2, h: 0.2,  speed: -0.02, color: [0.1, 0.5, 0.4, 1.0] },
+    { x: 1.2, y: 0.62,  w: 0.2, h: 0.2,  speed: -0.02, color: [0.1, 0.5, 0.4, 1.0] }
+];
 
 
 window.onload = function init()
@@ -174,19 +120,22 @@ window.addEventListener("keydown", function(event){
     
 } ); 
 
-function updateCar(car) {
+function updateCarPosition(car) {
     car.x += car.speed;
-    if (car.x > 1.2) {  // kemur aftur inn frá vinstri
+    if (car.speed > 0 && car.x > 1.2) { // ef bílinn fer til hægri
         car.x = -1.2;
-    }
-}
-
-function updateCarOfugt(car) {
-    car.x += car.speed;
-    if (car.x < -1.2) {  // kemur aftur inn frá hægri
+    } else if (car.speed < 0 && car.x < -1.2) { // ef bílinn fer til vinstri
         car.x = 1.2;
     }
 }
+
+function checkCollision(frog, car) {
+    return frog.x < car.x + car.w &&
+            frog.x + frog.w > car.x &&
+            frog.y <car.y + car.h &&
+            frog.y + frog.h > car.y
+}
+
 
 
 function drawCar(car) {
@@ -226,27 +175,28 @@ function render() {
 
 
 
-    // --- Bílar ---
-    updateCar(car1);
-    drawCar(car1);
+    // --- Bílar og collision ---
 
-    updateCarOfugt(car2);
-    drawCar(car2);
+    var frogBox = {
+        x: frogX - frogSize,
+        y: frogY,
+        w: 2 * frogSize,
+        h: 2 * frogSize
+    };
 
-    updateCar(car3);
-    drawCar(car3);
-
-    updateCar(car4);
-    drawCar(car4);
-
-    updateCar(car5);
-    drawCar(car5);
-
-    updateCarOfugt(car6);
-    drawCar(car6);
-
-    updateCarOfugt(car7);
-    drawCar(car7);
+    for (let i = 0; i < cars.length; i++) {
+        updateCarPosition(cars[i]);
+        drawCar(cars[i]);
+    
+        if (checkCollision(frogBox, cars[i])) {
+            console.log("Collision!");
+            // t.d. reset frog
+            frogX = 0.0;
+            frogY = -0.95;
+            frogFacingUp = true;
+            break;
+        }
+    }
 
     if (frogY + 2*frogSize >= 1 - topGrass) {
         frogFacingUp = false; 
